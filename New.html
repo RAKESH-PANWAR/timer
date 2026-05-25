@@ -1,0 +1,929 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title> Chat Tracker</title>
+
+<style>
+
+*{
+  margin:0;
+  padding:0;
+  box-sizing:border-box;
+}
+
+body{
+  font-family:'Segoe UI',sans-serif;
+  background:#f4f6fb;
+  color:#333;
+  padding:25px;
+  transition:0.3s;
+}
+
+body.dark{
+  background:#121212;
+  color:#f1f1f1;
+}
+
+.header{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  margin-bottom:25px;
+}
+
+.header h1{
+  font-size:34px;
+}
+
+.dark-btn{
+  width:auto;
+  padding:10px 18px;
+}
+
+.form-container{
+  display:flex;
+  flex-wrap:wrap;
+  gap:20px;
+  background:#fff;
+  padding:25px;
+  border-radius:16px;
+  box-shadow:0 8px 20px rgba(0,0,0,0.05);
+  margin-bottom:20px;
+}
+
+body.dark .form-container,
+body.dark table,
+body.dark .count-container{
+  background:#1e1e1e;
+}
+
+.form-container > div{
+  flex:1 1 250px;
+  display:flex;
+  flex-direction:column;
+}
+
+label{
+  margin-bottom:6px;
+  font-weight:600;
+}
+
+input,
+select,
+textarea,
+button{
+  padding:12px;
+  border-radius:8px;
+  border:1px solid #ccc;
+  font-size:15px;
+}
+
+body.dark input,
+body.dark select,
+body.dark textarea{
+  background:#2a2a2a;
+  color:#fff;
+  border:1px solid #444;
+}
+
+button{
+  background:#6c63ff;
+  color:white;
+  border:none;
+  cursor:pointer;
+  font-weight:bold;
+}
+
+button:hover{
+  background:#574bdb;
+}
+
+.count-container{
+  background:#fff;
+  padding:20px;
+  border-radius:12px;
+  margin-bottom:20px;
+}
+
+.search-box{
+  margin-bottom:20px;
+}
+
+table{
+  width:100%;
+  border-collapse:collapse;
+  background:#fff;
+  border-radius:16px;
+  overflow:hidden;
+}
+
+th,td{
+  padding:14px;
+  border-bottom:1px solid #eee;
+  text-align:center;
+}
+
+body.dark th,
+body.dark td{
+  border-color:#333;
+}
+
+th{
+  background:#f1f3f9;
+}
+
+body.dark th{
+  background:#2a2a2a;
+}
+
+.priority-high{
+  background:#ffdddd !important;
+}
+
+.priority-medium{
+  background:#fff2cc !important;
+}
+
+.priority-low{
+  background:#ddffdd !important;
+}
+
+body.dark .priority-high{
+  background:#5a1f1f !important;
+}
+
+body.dark .priority-medium{
+  background:#5a4a1f !important;
+}
+
+body.dark .priority-low{
+  background:#1f5a2d !important;
+}
+
+.fin-tag{
+  color:#1a8f3c;
+  font-weight:bold;
+}
+
+.bonus-tag{
+  color:#7b3fe4;
+  font-weight:bold;
+}
+
+.tech-tag{
+  color:#d43f3f;
+  font-weight:bold;
+}
+
+.af-tag{
+  color:#ff8c00;
+  font-weight:bold;
+}
+
+.product-tag{
+  color:#0097a7;
+  font-weight:bold;
+}
+
+.service-tag{
+  color:#795548;
+  font-weight:bold;
+}
+
+.crypto-tag{
+  color:#e6a700;
+  font-weight:bold;
+}
+
+.overdue{
+  color:red;
+  font-weight:bold;
+}
+
+.btn-replied{
+  background:#28c76f;
+}
+
+.restore-btn{
+  background:#ff9800;
+  margin-left:10px;
+}
+
+.custom-alert{
+  display:none;
+  margin-bottom:20px;
+  padding:12px;
+  border-radius:8px;
+  background:#dff0ff;
+  color:#21618c;
+  font-weight:bold;
+}
+
+textarea{
+  resize:vertical;
+}
+
+.button-group{
+  margin-bottom:20px;
+}
+
+</style>
+</head>
+
+<body>
+
+<div class="header">
+
+  <h1>📋  Chat Tracker</h1>
+
+  <button
+    class="dark-btn"
+    onclick="toggleDarkMode()"
+  >
+    🌙 Dark Mode
+  </button>
+
+</div>
+
+<div class="custom-alert" id="alertBox"></div>
+
+<div class="form-container">
+
+  <div>
+    <label>VIP Manager</label>
+
+    <input
+      type="text"
+      id="vipName"
+      placeholder="Enter VIP Name"
+    >
+  </div>
+
+  <div>
+    <label>Client ID</label>
+
+    <input
+      type="text"
+      id="clientId"
+      placeholder="Enter Client ID"
+    >
+  </div>
+
+  <div>
+    <label>Priority</label>
+
+    <select id="priority">
+      <option value="high">🔴 High</option>
+      <option value="medium">🟡 Medium</option>
+      <option value="low">🟢 Low</option>
+    </select>
+  </div>
+
+  <div>
+    <label>Remark / Tag</label>
+
+    <select id="remarkSelect">
+
+      <optgroup label="💰 Financial">
+        <option>[FIN] Deposit questions</option>
+        <option>[FIN] Withdrawal questions</option>
+        <option>[FIN] Withdrawal not received - FIAT</option>
+        <option>[FIN] Withdrawal not received - CRYPTO</option>
+        <option>[FIN] Withdrawal processing</option>
+        <option>[FIN] Withdrawal cancelled</option>
+        <option>[FIN] Deposit not received - FIAT</option>
+        <option>[FIN] Deposit not received - CRYPTO</option>
+        <option>[FIN] Top-up error</option>
+        <option>[FIN] Deposit - update</option>
+        <option>[FIN] Other</option>
+      </optgroup>
+
+      <optgroup label="🎁 Bonuses">
+        <option>[BONUSES] No-deposit - declined</option>
+        <option>[BONUSES] Deposit - declined</option>
+        <option>[BONUSES] No-deposit - granted</option>
+        <option>[BONUSES] Deposit - granted</option>
+        <option>[BONUSES] Bonus declined</option>
+        <option>[BONUSES] System bonuses question</option>
+        <option>[BONUSES] ICB question</option>
+        <option>[BONUSES] Not credited</option>
+        <option>[BONUSES] Bonus terms</option>
+        <option>[BONUSES] Not working</option>
+        <option>[BONUSES] Other</option>
+      </optgroup>
+
+      <optgroup label="🪙 Crypto">
+        <option>[CRYPTO] Deposit questions</option>
+        <option>[CRYPTO] Withdrawal questions</option>
+        <option>[CRYPTO] Crypto declined</option>
+        <option>[CRYPTO] Crypto sale</option>
+        <option>[CRYPTO] Other</option>
+      </optgroup>
+
+      <optgroup label="🎰 Product">
+        <option>[PRODUCT] Losses</option>
+        <option>[PRODUCT] Service complaint</option>
+        <option>[PRODUCT] Game not working</option>
+        <option>[PRODUCT] Bet not settled</option>
+        <option>[PRODUCT] Game question</option>
+        <option>[PRODUCT] Promo question</option>
+        <option>[PRODUCT] Other</option>
+      </optgroup>
+
+      <optgroup label="📞 Service">
+        <option>[SERVICE] Contact request</option>
+        <option>[SERVICE] Manager change</option>
+        <option>[SERVICE] Chat touchpoint</option>
+        <option>[SERVICE] Other</option>
+      </optgroup>
+
+      <optgroup label="🛠 Technical">
+        <option>[ТЕХ] Website not working</option>
+        <option>[ТЕХ] App not working</option>
+        <option>[ТЕХ] Section not working</option>
+        <option>[ТЕХ] Tournament winnings not calculated</option>
+        <option>[ТЕХ] Balance display</option>
+        <option>[ТЕХ] Current mirror</option>
+        <option>[ТЕХ] Other</option>
+      </optgroup>
+
+      <optgroup label="🔐 Anti-Fraud">
+        <option>[AF] Verification</option>
+        <option>[AF] VK</option>
+        <option>[AF] URC</option>
+        <option>[AF] SCAM</option>
+        <option>[AF] Block</option>
+        <option>[AF] Unblock</option>
+        <option>[AF] Other</option>
+      </optgroup>
+
+    </select>
+  </div>
+
+  <div style="flex:1 1 100%;">
+
+    <label>Notes</label>
+
+    <textarea
+      id="notes"
+      rows="3"
+      placeholder="Internal Notes..."
+    ></textarea>
+
+  </div>
+
+  <div>
+
+    <button onclick="addChat()">
+      ➕ Add Chat
+    </button>
+
+  </div>
+
+</div>
+
+<div
+  class="count-container"
+  id="countDisplay"
+></div>
+
+<div class="search-box">
+
+  <input
+    type="text"
+    id="searchInput"
+    placeholder="🔎 Search VIP / Client ID / Tag"
+    onkeyup="searchChats()"
+  >
+
+</div>
+
+<div class="button-group">
+
+<button onclick="downloadReport()">
+  📥 Download Report
+</button>
+
+<button
+  class="restore-btn"
+  onclick="restoreCompletedChats()"
+>
+  ♻ Restore Completed Chats
+</button>
+
+</div>
+
+<table>
+
+<thead>
+
+<tr>
+  <th>VIP</th>
+  <th>Client ID</th>
+  <th>Priority</th>
+  <th>Tag</th>
+  <th>Notes</th>
+  <th>Time</th>
+  <th>Stopwatch</th>
+  <th>Action</th>
+</tr>
+
+</thead>
+
+<tbody id="chatList"></tbody>
+
+</table>
+
+<script>
+
+let chatCounts =
+  JSON.parse(
+    localStorage.getItem('chatCounts')
+  ) || {};
+
+let countedClients =
+  new Set(
+    JSON.parse(
+      localStorage.getItem('countedClients')
+    ) || []
+  );
+
+let trackedClients =
+  new Set(
+    JSON.parse(
+      localStorage.getItem('trackedClients')
+    ) || []
+  );
+
+let reportData =
+  JSON.parse(
+    localStorage.getItem('reportData')
+  ) || [];
+
+let activeRows = new Map();
+
+function saveData(){
+
+  localStorage.setItem(
+    'chatCounts',
+    JSON.stringify(chatCounts)
+  );
+
+  localStorage.setItem(
+    'countedClients',
+    JSON.stringify([...countedClients])
+  );
+
+  localStorage.setItem(
+    'trackedClients',
+    JSON.stringify([...trackedClients])
+  );
+
+  localStorage.setItem(
+    'reportData',
+    JSON.stringify(reportData)
+  );
+}
+
+function showAlert(message){
+
+  const box =
+    document.getElementById('alertBox');
+
+  box.textContent = message;
+
+  box.style.display = 'block';
+
+  setTimeout(()=>{
+    box.style.display='none';
+  },3000);
+}
+
+function toggleDarkMode(){
+
+  document.body.classList.toggle('dark');
+}
+
+function formatTime(ms){
+
+  const totalSeconds =
+    Math.floor(ms / 1000);
+
+  const minutes =
+    String(Math.floor(totalSeconds / 60))
+    .padStart(2,'0');
+
+  const seconds =
+    String(totalSeconds % 60)
+    .padStart(2,'0');
+
+  return `${minutes}:${seconds}`;
+}
+
+function getTagClass(tag){
+
+  if(tag.includes('[FIN]')) return 'fin-tag';
+
+  if(tag.includes('[BONUSES]')) return 'bonus-tag';
+
+  if(tag.includes('[ТЕХ]')) return 'tech-tag';
+
+  if(tag.includes('[AF]')) return 'af-tag';
+
+  if(tag.includes('[PRODUCT]')) return 'product-tag';
+
+  if(tag.includes('[SERVICE]')) return 'service-tag';
+
+  if(tag.includes('[CRYPTO]')) return 'crypto-tag';
+
+  return '';
+}
+
+function updateCountsDisplay(){
+
+  let total = 0;
+
+  let html =
+    `<h3>📊 Chat Counts</h3>`;
+
+  for(let vip in chatCounts){
+
+    total += chatCounts[vip];
+
+    html += `
+      <p>
+        <strong>${vip}</strong>
+        → ${chatCounts[vip]}
+      </p>
+    `;
+  }
+
+  html += `
+    <hr style="margin:10px 0;">
+
+    <h3>
+      🔥 Total Unique Chats:
+      ${total}
+    </h3>
+  `;
+
+  document.getElementById('countDisplay')
+    .innerHTML = html;
+}
+
+function addChat(){
+
+  const vip =
+    document.getElementById('vipName')
+    .value.trim();
+
+  const clientId =
+    document.getElementById('clientId')
+    .value.trim();
+
+  const priority =
+    document.getElementById('priority')
+    .value;
+
+  const tag =
+    document.getElementById('remarkSelect')
+    .value;
+
+  const notes =
+    document.getElementById('notes')
+    .value.trim();
+
+  if(!vip || !clientId){
+
+    showAlert(
+      '❗ Fill all required fields'
+    );
+
+    return;
+  }
+
+  const countKey =
+    `${vip}-${clientId}`.toLowerCase();
+
+  if(trackedClients.has(countKey)){
+
+    showAlert(
+      '⚠️ Chat already active'
+    );
+
+    return;
+  }
+
+  trackedClients.add(countKey);
+
+  chatCounts[vip] =
+    chatCounts[vip] || 0;
+
+  if(!countedClients.has(countKey)){
+
+    countedClients.add(countKey);
+
+    chatCounts[vip]++;
+  }
+
+  updateCountsDisplay();
+
+  const now = new Date();
+
+  const savedChat = {
+
+    vip,
+    clientId,
+    priority,
+    tag,
+    notes,
+    time: now.toLocaleTimeString(),
+    createdAt: Date.now(),
+    closed:false
+
+  };
+
+  reportData.push(savedChat);
+
+  saveData();
+
+  createRow(savedChat);
+
+  document.getElementById('vipName').value='';
+
+  document.getElementById('clientId').value='';
+
+  document.getElementById('notes').value='';
+}
+
+function createRow(chat){
+
+  const row =
+    document.createElement('tr');
+
+  row.classList.add(
+    `priority-${chat.priority}`
+  );
+
+  const stopwatchCell =
+    document.createElement('td');
+
+  let startTime =
+    chat.createdAt || Date.now();
+
+  function updateTimer(){
+
+    const elapsed =
+      Date.now() - startTime;
+
+    stopwatchCell.textContent =
+      formatTime(elapsed);
+
+    if(elapsed >= 30 * 60000){
+
+      stopwatchCell.classList.add('overdue');
+    }
+  }
+
+  updateTimer();
+
+  const interval =
+    setInterval(updateTimer,1000);
+
+  const actionCell =
+    document.createElement('td');
+
+  const doneBtn =
+    document.createElement('button');
+
+  doneBtn.textContent =
+    '✔ Replied';
+
+  doneBtn.className =
+    'btn-replied';
+
+  doneBtn.onclick = ()=>{
+
+    clearInterval(interval);
+
+    row.remove();
+
+    chat.closed = true;
+
+    const countKey =
+      `${chat.vip}-${chat.clientId}`
+      .toLowerCase();
+
+    trackedClients.delete(countKey);
+
+    activeRows.delete(countKey);
+
+    saveData();
+
+    showAlert(
+      '✅ Chat completed & saved'
+    );
+  };
+
+  actionCell.appendChild(doneBtn);
+
+  row.innerHTML = `
+    <td>${chat.vip}</td>
+
+    <td>${chat.clientId}</td>
+
+    <td>
+      ${chat.priority.toUpperCase()}
+    </td>
+
+    <td class="${getTagClass(chat.tag)}">
+      ${chat.tag}
+    </td>
+
+    <td>${chat.notes || '-'}</td>
+
+    <td>${chat.time}</td>
+  `;
+
+  row.appendChild(stopwatchCell);
+
+  row.appendChild(actionCell);
+
+  document.getElementById('chatList')
+    .appendChild(row);
+
+  activeRows.set(
+    `${chat.vip}-${chat.clientId}`.toLowerCase(),
+    row
+  );
+}
+
+function restoreChats(){
+
+  document.getElementById('chatList')
+    .innerHTML='';
+
+  reportData.forEach(chat=>{
+
+    if(chat.closed !== true){
+
+      const countKey =
+        `${chat.vip}-${chat.clientId}`
+        .toLowerCase();
+
+      trackedClients.add(countKey);
+
+      createRow(chat);
+    }
+
+  });
+
+  updateCountsDisplay();
+}
+
+function restoreCompletedChats(){
+
+  const completedChats =
+    reportData.filter(
+      chat => chat.closed === true
+    );
+
+  if(completedChats.length === 0){
+
+    showAlert(
+      '❗ No completed chats found'
+    );
+
+    return;
+  }
+
+  completedChats.forEach(chat=>{
+
+    chat.closed = false;
+
+    const countKey =
+      `${chat.vip}-${chat.clientId}`
+      .toLowerCase();
+
+    trackedClients.add(countKey);
+  });
+
+  saveData();
+
+  restoreChats();
+
+  showAlert(
+    '♻ Completed chats restored'
+  );
+}
+
+function searchChats(){
+
+  const input =
+    document.getElementById('searchInput')
+    .value.toLowerCase();
+
+  const rows =
+    document.querySelectorAll('#chatList tr');
+
+  rows.forEach(row=>{
+
+    const text =
+      row.innerText.toLowerCase();
+
+    row.style.display =
+      text.includes(input)
+      ? ''
+      : 'none';
+  });
+}
+
+function downloadReport(){
+
+  if(reportData.length===0){
+
+    showAlert('❗ No data');
+
+    return;
+  }
+
+  let text =
+`========= FULL CHAT REPORT =========
+
+`;
+
+  reportData.forEach((chat,index)=>{
+
+    text += `
+${index + 1}.
+
+VIP        : ${chat.vip}
+
+Client ID  : ${chat.clientId}
+
+Priority   : ${chat.priority}
+
+Tag        : ${chat.tag}
+
+Notes      : ${chat.notes || '-'}
+
+Time       : ${chat.time}
+
+Status     : ${
+  chat.closed
+  ? 'COMPLETED'
+  : 'ACTIVE'
+}
+
+----------------------------------------
+
+`;
+  });
+
+  const completedChats =
+    reportData.filter(
+      x => x.closed === true
+    ).length;
+
+  const activeChats =
+    reportData.filter(
+      x => x.closed !== true
+    ).length;
+
+  text += `
+
+========================================
+TOTAL CHATS        : ${reportData.length}
+
+ACTIVE CHATS       : ${activeChats}
+
+COMPLETED CHATS    : ${completedChats}
+========================================
+`;
+
+  const blob =
+    new Blob(
+      [text],
+      {type:'text/plain'}
+    );
+
+  const a =
+    document.createElement('a');
+
+  a.href =
+    URL.createObjectURL(blob);
+
+  a.download =
+    'Full_Chat_Report.txt';
+
+  a.click();
+}
+
+restoreChats();
+
+</script>
+
+</body>
+</html>
